@@ -1,0 +1,967 @@
+<script src="//uniqueturker.myleott.com/lib.js" type="text/javascript"></script><script type="text/javascript">
+(function(){
+    var ut_id = "YOUR UNIQUETURKER ID HERE";
+    if (UTWorkerLimitReached(ut_id)) {
+        document.getElementById('mturk_form').style.display = 'none';
+        document.getElementsByTagName('body')[0].innerHTML = "You have already completed the maximum number of HITs allowed by this requester. Please click 'Return HIT' to avoid any impact on your approval rating.";
+    }
+})();
+loaded = [];
+</script>
+<meta content="width=device-width,initial-scale=1" name="viewport" />
+<section class="container" id="ImageAorB"><!-- Instructions -->
+<div class="row">
+<div class="col-xs-12 col-md-12">
+<div class="panel panel-primary"><!-- WARNING: the ids "collapseTrigger" and "instructionBody" are being used to enable expand/collapse feature --><a class="panel-heading" href="javascript:void(0);" style="color:#fff; display: block; text-decoration: none;"><strong>In each row, pick the video that is more realistic (left or right)?</strong> </a>
+<div class="panel-body" id="instructionBody"><!-- Add instruction body content here -->
+<p>There are 59&nbsp;rows (pairs of videos) in this HIT. For each row, click &quot;Show Videos&quot; to view the videos in that row.</p>
+
+<p>Before each video appears, a dot will flash twice to indicate where the video will play.</p>
+
+<p>After viewing both videos, choose which of the two videos appears&nbsp;more realistic to you: left or right. <strong>Your submission may be rejected if you make a mistake in an obvious case.&nbsp;Your submission may&nbsp;be rejected if you&nbsp;submit an incomplete HIT.</strong></p>
+
+<p>The first 3 rows are for warm-up.&nbsp;They can also be viewed&nbsp;during HIT Preview.</p>
+
+<p><b>Estimated Time for Completion: 10-15 min</b></p>
+
+<p>Things to note:</p>
+
+<ul>
+	<li>Each video will appear one at a time.</li>
+	<li>Once a video is shown, you can not replay it.</li>
+	<li>Videos will appear for a limited time: between 0.3&nbsp;to 4.8 seconds.</li>
+	<li>A choice can only be made after both videos in the row have been shown.</li>
+	<li>The next &ldquo;Show Videos&rdquo; button will appear for the next row after making your choice for the current row.</li>
+	<li>Your choice can not be changed after you click the next&nbsp;&ldquo;Show Videos&rdquo; button.</li>
+	<li>There will be multiple batches with multiple versions&nbsp;of this HIT. You&nbsp;may only accept one and&nbsp;will not be allowed to complete any other afterwards.&nbsp;<strong>Your submission will be rejected if you complete more than one HIT</strong>.</li>
+	<li>Please email me if you&#39;re experiencing any technical issues. Heads up, this HIT works best on the latest version of Chrome on a decent internet connection. I can&#39;t guarantee proper functionality on Firefox, Opera, Microsoft Edge, or Safari. Sorry if this may cause any inconvenience!</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div class="col-xs-12 col-md-12">
+<div class="panel panel-primary"><a class="panel-heading" href="javascript:void(0);" id="collapseTrigger"><strong>Contact information</strong> <span class="collapse-text">(Click to expand)</span> </a>
+
+<div class="panel-body" id="contactInfoBody"><img src="https://ryersonvisionlab.github.io/two-stream-projpage/img/yorklogo.jpg" /><img src="https://ryersonvisionlab.github.io/two-stream-projpage/img/ryersonlogo.png" /><br />
+<strong>Requester:</strong> Matthew Tesfaldet<br />
+<b>Affiliations</b><strong>:</strong>&nbsp;<a href="http://www.yorku.ca/index.html">York University</a> (Toronto, ON, Canada) &amp;&nbsp;<a href="http://www.ryerson.ca">Ryerson University</a> (Toronto, ON, Canada)<br />
+<strong>Departments:</strong> <a href="http://eecs.lassonde.yorku.ca">Electrical Engineering and Computer Science</a> (York University) &amp; <a href="http://www.scs.ryerson.ca">Computer Science</a> (Ryerson University)<br />
+<strong>Labs:</strong>&nbsp;<a href="https://cvil.eecs.yorku.ca">Computational Vision and Imaging Lab</a> (York University) &amp; Ryerson Vision Lab (Ryerson University)<br />
+<strong>Preferred Email:</strong> <a href="mailto:mtesfald@eecs.yorku.ca?subject=Mturk%20Video%20Comparison%20HIT%20Question">mtesfald@eecs.yorku.ca</a><br />
+<br />
+It is recommended&nbsp;to save this information before submitting your HIT.&nbsp;If you have any issues or questions regarding this HIT, please do not hesitate to email me (include your worker ID and assignment ID, if necessary) and I will get back to you shortly.&nbsp;Thank you.</div>
+</div>
+</div>
+</div>
+<!-- End Instructions --><script src="https://code.jquery.com/jquery-3.1.0.min.js" integrity="sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s=" crossorigin="anonymous"></script><script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js" integrity="sha384-s1ITto93iSMDxlp/79qhWHi+LsIi9Gx6yL+cOKDuymvihkfol83TYbLbOw+W/wv4" crossorigin="anonymous"></script><script type="text/javascript">
+  counter = 0;
+
+  function showHide(button, which, which2, tm) {
+    // check if necessary videos have been loaded
+		if (!document.getElementById(which).complete || !document.getElementById(which2).complete) {
+      button.value = "Loading... Try again.";
+      return;
+    }
+
+    // hide current "Show these videos" button after clicking it
+    button.style.visibility="hidden";
+
+    // small delay before initiating everything
+    setTimeout(function(){
+      counter += 1;
+
+      // disable previous radio buttons after worker has clicked current
+      // "Show these videos" button (don't do this for first row)
+      if (counter > 1 && counter < 59) {
+        ch_prev = document.getElementsByName("choice_" + (counter-1));
+        if (ch_prev[0].checked) {
+          ch_prev[1].disabled = true;
+        } else if (ch_prev[1].checked) {
+          ch_prev[0].disabled = true;
+        }
+      }
+
+      dot_order = button.getAttribute('data-dot-order');
+
+      // video appearance order
+      if (dot_order == '12') {
+        first = which;
+        second = which2;
+      } else if (dot_order == '21') {
+        first = which2;
+        second = which;
+      }
+
+      // show first video
+      // (dot flashes for 250 ms delay between frames)
+			console.log('show first video');
+      document.getElementById(first).style.visibility="visible";
+
+      // hide first video
+      setTimeout(function(){
+				console.log('hide first video');
+        document.getElementById(first).style.visibility="hidden";
+      }, 1000 + tm);
+
+      // starting point
+      t = 1000 + tm;
+
+      // show second video
+      setTimeout(function(){
+				console.log('show second video');
+        document.getElementById(second).style.visibility="visible";
+      }, t + 500);
+
+      // hide second video
+      setTimeout(function(){
+				console.log('hide second video');
+        document.getElementById(second).style.visibility="hidden";
+      }, t + 500 + 1000 + tm);
+
+      // starting point
+      t = t + 500 + 1000 + tm;
+
+      setTimeout(function(){
+				console.log('hide both videos');
+        // hide both videos
+        document.getElementById(first).style.visibility="hidden";
+        document.getElementById(second).style.visibility="hidden";
+
+				console.log('empty src');
+        // change videos to no src
+        document.getElementById(first).src="";
+        document.getElementById(second).src="";
+
+        if (counter <= 59) {
+          // radio buttons indexing starts at 1, so this fetches the
+          // current row of radio buttons
+          ch = document.getElementsByName("choice_" + counter);
+          // enable radio buttons after showing videos
+					console.log('enable radio buttons');
+					console.log(counter);
+          ch[0].disabled = false;
+          ch[1].disabled = false;
+
+          if (counter < 59) {
+            // make next "Show these videos" button visible after worker
+            // has made choice
+            ch[0].onchange = function() {
+              buttons = document.getElementsByName("show");
+              buttons[counter].style.visibility = "visible";
+            }
+            ch[1].onchange = function() {
+              buttons = document.getElementsByName("show");
+              buttons[counter].style.visibility = "visible";
+            }
+          } else if (counter == 59) {
+            // enable submit button after all videos have been viewed and
+            // worker has made their final choice
+            // (form won't submit if it's not completely filled out)
+            ch[0].onchange = function() {
+              submitbtn = document.getElementById("submitButton");
+              submitbtn.disabled = false;
+              submitbtn.value = "Submit";
+            }
+            ch[1].onchange = function() {
+              submitbtn = document.getElementById("submitButton");
+              submitbtn.disabled = false;
+              submitbtn.value = "Submit";
+            }
+          }
+        }
+      }, t + 500);
+    }, 500);
+  }
+
+  window.onload = function() {
+    // during preview mode, only allow completion warm-up
+    if (turkGetParam('assignmentId') == "ASSIGNMENT_ID_NOT_AVAILABLE") {
+      // preload images once per second sequentially (top to bottom)
+      for (i = 1; i <= 59; i++) {
+        hidden_count = 1;
+        if (i > 3) {
+          setTimeout(function() {
+            document.getElementById('hiddenA_' + hidden_count).setAttribute('data-source', '');
+            document.getElementById('hiddenA_' + hidden_count).setAttribute('onload', '');
+            document.getElementById('hiddenB_' + hidden_count).setAttribute('data-source', '');
+            document.getElementById('hiddenB_' + hidden_count).setAttribute('onload', '');
+            hidden_count += 1;
+          }, 1000 * i);
+        } else {
+          setTimeout(function() {
+            document.getElementById('hiddenA_' + hidden_count).setAttribute('src', document.getElementById('hiddenA_' + hidden_count).getAttribute('data-source'));
+            document.getElementById('hiddenB_' + hidden_count).setAttribute('src', document.getElementById('hiddenB_' + hidden_count).getAttribute('data-source'));
+            hidden_count += 1;
+          }, 1000 * i);
+        }
+      }
+      buttons = document.getElementsByName("show");
+      for (i = 3; i < buttons.length; i++) {
+        buttons[i].disabled = true;
+      }
+    } else {
+      // preload images once per second sequentially (top to bottom)
+      for (i = 1; i <= 59; i++) {
+        hidden_count = 1;
+        setTimeout(function() {
+          document.getElementById('hiddenA_' + hidden_count).setAttribute('src', document.getElementById('hiddenA_' + hidden_count).getAttribute('data-source'));
+          document.getElementById('hiddenB_' + hidden_count).setAttribute('src', document.getElementById('hiddenB_' + hidden_count).getAttribute('data-source'));
+          hidden_count += 1;
+        }, 1000 * i);
+      }
+    }
+  }
+</script>
+<!-- OUTPUT_TIMED.TXT CONTENT STARTS HERE -->
+<!-- "Warm-up" p tags are added to the first three rows. This isn't included in output_timed.txt, so don't forget to add it in manually. -->
+<div class="row">
+<p style="text-align: center; color: green;"><strong>Warm-up</strong></p>
+
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_1}" name="show" onclick="showHide(this,'hiddenA_1','hiddenB_1',${time_1})" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_1" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_1}" height="256/" id="hiddenA_1" onload="loaded.push('${image_A_url_1}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_1" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_1}" height="256" id="hiddenB_1" onload="loaded.push('${image_B_url_1}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center; color: green;"><strong>Warm-up</strong></p>
+
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_2}" name="show" onclick="showHide(this,'hiddenA_2','hiddenB_2',${time_2})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_2" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_2}" height="256/" id="hiddenA_2" onload="loaded.push('${image_A_url_2}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_2" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_2}" height="256" id="hiddenB_2" onload="loaded.push('${image_B_url_2}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center; color: green;"><strong>Warm-up</strong></p>
+
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_3}" name="show" onclick="showHide(this,'hiddenA_3','hiddenB_3',${time_3})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_3" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_3}" height="256/" id="hiddenA_3" onload="loaded.push('${image_A_url_3}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_3" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_3}" height="256" id="hiddenB_3" onload="loaded.push('${image_B_url_3}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_4}" name="show" onclick="showHide(this,'hiddenA_4','hiddenB_4',${time_4})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_4" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_4}" height="256/" id="hiddenA_4" onload="loaded.push('${image_A_url_4}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_4" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_4}" height="256" id="hiddenB_4" onload="loaded.push('${image_B_url_4}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_5}" name="show" onclick="showHide(this,'hiddenA_5','hiddenB_5',${time_5})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_5" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_5}" height="256/" id="hiddenA_5" onload="loaded.push('${image_A_url_5}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_5" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_5}" height="256" id="hiddenB_5" onload="loaded.push('${image_B_url_5}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_6}" name="show" onclick="showHide(this,'hiddenA_6','hiddenB_6',${time_6})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_6" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_6}" height="256/" id="hiddenA_6" onload="loaded.push('${image_A_url_6}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_6" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_6}" height="256" id="hiddenB_6" onload="loaded.push('${image_B_url_6}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_7}" name="show" onclick="showHide(this,'hiddenA_7','hiddenB_7',${time_7})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_7" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_7}" height="256/" id="hiddenA_7" onload="loaded.push('${image_A_url_7}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_7" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_7}" height="256" id="hiddenB_7" onload="loaded.push('${image_B_url_7}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_8}" name="show" onclick="showHide(this,'hiddenA_8','hiddenB_8',${time_8})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_8" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_8}" height="256/" id="hiddenA_8" onload="loaded.push('${image_A_url_8}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_8" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_8}" height="256" id="hiddenB_8" onload="loaded.push('${image_B_url_8}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_9}" name="show" onclick="showHide(this,'hiddenA_9','hiddenB_9',${time_9})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_9" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_9}" height="256/" id="hiddenA_9" onload="loaded.push('${image_A_url_9}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_9" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_9}" height="256" id="hiddenB_9" onload="loaded.push('${image_B_url_9}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_10}" name="show" onclick="showHide(this,'hiddenA_10','hiddenB_10',${time_10})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_10" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_10}" height="256/" id="hiddenA_10" onload="loaded.push('${image_A_url_10}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_10" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_10}" height="256" id="hiddenB_10" onload="loaded.push('${image_B_url_10}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_11}" name="show" onclick="showHide(this,'hiddenA_11','hiddenB_11',${time_11})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_11" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_11}" height="256/" id="hiddenA_11" onload="loaded.push('${image_A_url_11}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_11" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_11}" height="256" id="hiddenB_11" onload="loaded.push('${image_B_url_11}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_12}" name="show" onclick="showHide(this,'hiddenA_12','hiddenB_12',${time_12})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_12" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_12}" height="256/" id="hiddenA_12" onload="loaded.push('${image_A_url_12}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_12" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_12}" height="256" id="hiddenB_12" onload="loaded.push('${image_B_url_12}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_13}" name="show" onclick="showHide(this,'hiddenA_13','hiddenB_13',${time_13})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_13" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_13}" height="256/" id="hiddenA_13" onload="loaded.push('${image_A_url_13}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_13" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_13}" height="256" id="hiddenB_13" onload="loaded.push('${image_B_url_13}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_14}" name="show" onclick="showHide(this,'hiddenA_14','hiddenB_14',${time_14})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_14" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_14}" height="256/" id="hiddenA_14" onload="loaded.push('${image_A_url_14}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_14" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_14}" height="256" id="hiddenB_14" onload="loaded.push('${image_B_url_14}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_15}" name="show" onclick="showHide(this,'hiddenA_15','hiddenB_15',${time_15})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_15" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_15}" height="256/" id="hiddenA_15" onload="loaded.push('${image_A_url_15}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_15" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_15}" height="256" id="hiddenB_15" onload="loaded.push('${image_B_url_15}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_16}" name="show" onclick="showHide(this,'hiddenA_16','hiddenB_16',${time_16})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_16" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_16}" height="256/" id="hiddenA_16" onload="loaded.push('${image_A_url_16}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_16" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_16}" height="256" id="hiddenB_16" onload="loaded.push('${image_B_url_16}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_17}" name="show" onclick="showHide(this,'hiddenA_17','hiddenB_17',${time_17})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_17" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_17}" height="256/" id="hiddenA_17" onload="loaded.push('${image_A_url_17}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_17" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_17}" height="256" id="hiddenB_17" onload="loaded.push('${image_B_url_17}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_18}" name="show" onclick="showHide(this,'hiddenA_18','hiddenB_18',${time_18})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_18" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_18}" height="256/" id="hiddenA_18" onload="loaded.push('${image_A_url_18}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_18" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_18}" height="256" id="hiddenB_18" onload="loaded.push('${image_B_url_18}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_19}" name="show" onclick="showHide(this,'hiddenA_19','hiddenB_19',${time_19})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_19" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_19}" height="256/" id="hiddenA_19" onload="loaded.push('${image_A_url_19}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_19" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_19}" height="256" id="hiddenB_19" onload="loaded.push('${image_B_url_19}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_20}" name="show" onclick="showHide(this,'hiddenA_20','hiddenB_20',${time_20})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_20" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_20}" height="256/" id="hiddenA_20" onload="loaded.push('${image_A_url_20}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_20" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_20}" height="256" id="hiddenB_20" onload="loaded.push('${image_B_url_20}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_21}" name="show" onclick="showHide(this,'hiddenA_21','hiddenB_21',${time_21})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_21" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_21}" height="256/" id="hiddenA_21" onload="loaded.push('${image_A_url_21}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_21" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_21}" height="256" id="hiddenB_21" onload="loaded.push('${image_B_url_21}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_22}" name="show" onclick="showHide(this,'hiddenA_22','hiddenB_22',${time_22})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_22" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_22}" height="256/" id="hiddenA_22" onload="loaded.push('${image_A_url_22}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_22" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_22}" height="256" id="hiddenB_22" onload="loaded.push('${image_B_url_22}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_23}" name="show" onclick="showHide(this,'hiddenA_23','hiddenB_23',${time_23})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_23" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_23}" height="256/" id="hiddenA_23" onload="loaded.push('${image_A_url_23}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_23" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_23}" height="256" id="hiddenB_23" onload="loaded.push('${image_B_url_23}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_24}" name="show" onclick="showHide(this,'hiddenA_24','hiddenB_24',${time_24})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_24" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_24}" height="256/" id="hiddenA_24" onload="loaded.push('${image_A_url_24}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_24" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_24}" height="256" id="hiddenB_24" onload="loaded.push('${image_B_url_24}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_25}" name="show" onclick="showHide(this,'hiddenA_25','hiddenB_25',${time_25})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_25" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_25}" height="256/" id="hiddenA_25" onload="loaded.push('${image_A_url_25}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_25" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_25}" height="256" id="hiddenB_25" onload="loaded.push('${image_B_url_25}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_26}" name="show" onclick="showHide(this,'hiddenA_26','hiddenB_26',${time_26})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_26" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_26}" height="256/" id="hiddenA_26" onload="loaded.push('${image_A_url_26}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_26" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_26}" height="256" id="hiddenB_26" onload="loaded.push('${image_B_url_26}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_27}" name="show" onclick="showHide(this,'hiddenA_27','hiddenB_27',${time_27})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_27" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_27}" height="256/" id="hiddenA_27" onload="loaded.push('${image_A_url_27}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_27" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_27}" height="256" id="hiddenB_27" onload="loaded.push('${image_B_url_27}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_28}" name="show" onclick="showHide(this,'hiddenA_28','hiddenB_28',${time_28})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_28" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_28}" height="256/" id="hiddenA_28" onload="loaded.push('${image_A_url_28}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_28" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_28}" height="256" id="hiddenB_28" onload="loaded.push('${image_B_url_28}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_29}" name="show" onclick="showHide(this,'hiddenA_29','hiddenB_29',${time_29})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_29" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_29}" height="256/" id="hiddenA_29" onload="loaded.push('${image_A_url_29}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_29" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_29}" height="256" id="hiddenB_29" onload="loaded.push('${image_B_url_29}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_30}" name="show" onclick="showHide(this,'hiddenA_30','hiddenB_30',${time_30})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_30" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_30}" height="256/" id="hiddenA_30" onload="loaded.push('${image_A_url_30}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_30" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_30}" height="256" id="hiddenB_30" onload="loaded.push('${image_B_url_30}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_31}" name="show" onclick="showHide(this,'hiddenA_31','hiddenB_31',${time_31})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_31" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_31}" height="256/" id="hiddenA_31" onload="loaded.push('${image_A_url_31}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_31" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_31}" height="256" id="hiddenB_31" onload="loaded.push('${image_B_url_31}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_32}" name="show" onclick="showHide(this,'hiddenA_32','hiddenB_32',${time_32})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_32" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_32}" height="256/" id="hiddenA_32" onload="loaded.push('${image_A_url_32}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_32" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_32}" height="256" id="hiddenB_32" onload="loaded.push('${image_B_url_32}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_33}" name="show" onclick="showHide(this,'hiddenA_33','hiddenB_33',${time_33})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_33" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_33}" height="256/" id="hiddenA_33" onload="loaded.push('${image_A_url_33}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_33" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_33}" height="256" id="hiddenB_33" onload="loaded.push('${image_B_url_33}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_34}" name="show" onclick="showHide(this,'hiddenA_34','hiddenB_34',${time_34})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_34" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_34}" height="256/" id="hiddenA_34" onload="loaded.push('${image_A_url_34}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_34" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_34}" height="256" id="hiddenB_34" onload="loaded.push('${image_B_url_34}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_35}" name="show" onclick="showHide(this,'hiddenA_35','hiddenB_35',${time_35})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_35" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_35}" height="256/" id="hiddenA_35" onload="loaded.push('${image_A_url_35}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_35" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_35}" height="256" id="hiddenB_35" onload="loaded.push('${image_B_url_35}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_36}" name="show" onclick="showHide(this,'hiddenA_36','hiddenB_36',${time_36})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_36" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_36}" height="256/" id="hiddenA_36" onload="loaded.push('${image_A_url_36}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_36" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_36}" height="256" id="hiddenB_36" onload="loaded.push('${image_B_url_36}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_37}" name="show" onclick="showHide(this,'hiddenA_37','hiddenB_37',${time_37})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_37" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_37}" height="256/" id="hiddenA_37" onload="loaded.push('${image_A_url_37}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_37" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_37}" height="256" id="hiddenB_37" onload="loaded.push('${image_B_url_37}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_38}" name="show" onclick="showHide(this,'hiddenA_38','hiddenB_38',${time_38})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_38" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_38}" height="256/" id="hiddenA_38" onload="loaded.push('${image_A_url_38}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_38" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_38}" height="256" id="hiddenB_38" onload="loaded.push('${image_B_url_38}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_39}" name="show" onclick="showHide(this,'hiddenA_39','hiddenB_39',${time_39})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_39" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_39}" height="256/" id="hiddenA_39" onload="loaded.push('${image_A_url_39}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_39" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_39}" height="256" id="hiddenB_39" onload="loaded.push('${image_B_url_39}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_40}" name="show" onclick="showHide(this,'hiddenA_40','hiddenB_40',${time_40})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_40" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_40}" height="256/" id="hiddenA_40" onload="loaded.push('${image_A_url_40}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_40" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_40}" height="256" id="hiddenB_40" onload="loaded.push('${image_B_url_40}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_41}" name="show" onclick="showHide(this,'hiddenA_41','hiddenB_41',${time_41})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_41" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_41}" height="256/" id="hiddenA_41" onload="loaded.push('${image_A_url_41}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_41" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_41}" height="256" id="hiddenB_41" onload="loaded.push('${image_B_url_41}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_42}" name="show" onclick="showHide(this,'hiddenA_42','hiddenB_42',${time_42})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_42" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_42}" height="256/" id="hiddenA_42" onload="loaded.push('${image_A_url_42}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_42" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_42}" height="256" id="hiddenB_42" onload="loaded.push('${image_B_url_42}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_43}" name="show" onclick="showHide(this,'hiddenA_43','hiddenB_43',${time_43})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_43" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_43}" height="256/" id="hiddenA_43" onload="loaded.push('${image_A_url_43}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_43" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_43}" height="256" id="hiddenB_43" onload="loaded.push('${image_B_url_43}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_44}" name="show" onclick="showHide(this,'hiddenA_44','hiddenB_44',${time_44})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_44" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_44}" height="256/" id="hiddenA_44" onload="loaded.push('${image_A_url_44}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_44" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_44}" height="256" id="hiddenB_44" onload="loaded.push('${image_B_url_44}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_45}" name="show" onclick="showHide(this,'hiddenA_45','hiddenB_45',${time_45})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_45" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_45}" height="256/" id="hiddenA_45" onload="loaded.push('${image_A_url_45}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_45" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_45}" height="256" id="hiddenB_45" onload="loaded.push('${image_B_url_45}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_46}" name="show" onclick="showHide(this,'hiddenA_46','hiddenB_46',${time_46})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_46" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_46}" height="256/" id="hiddenA_46" onload="loaded.push('${image_A_url_46}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_46" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_46}" height="256" id="hiddenB_46" onload="loaded.push('${image_B_url_46}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_47}" name="show" onclick="showHide(this,'hiddenA_47','hiddenB_47',${time_47})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_47" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_47}" height="256/" id="hiddenA_47" onload="loaded.push('${image_A_url_47}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_47" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_47}" height="256" id="hiddenB_47" onload="loaded.push('${image_B_url_47}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_48}" name="show" onclick="showHide(this,'hiddenA_48','hiddenB_48',${time_48})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_48" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_48}" height="256/" id="hiddenA_48" onload="loaded.push('${image_A_url_48}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_48" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_48}" height="256" id="hiddenB_48" onload="loaded.push('${image_B_url_48}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_49}" name="show" onclick="showHide(this,'hiddenA_49','hiddenB_49',${time_49})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_49" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_49}" height="256/" id="hiddenA_49" onload="loaded.push('${image_A_url_49}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_49" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_49}" height="256" id="hiddenB_49" onload="loaded.push('${image_B_url_49}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_50}" name="show" onclick="showHide(this,'hiddenA_50','hiddenB_50',${time_50})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_50" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_50}" height="256/" id="hiddenA_50" onload="loaded.push('${image_A_url_50}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_50" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_50}" height="256" id="hiddenB_50" onload="loaded.push('${image_B_url_50}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_51}" name="show" onclick="showHide(this,'hiddenA_51','hiddenB_51',${time_51})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_51" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_51}" height="256/" id="hiddenA_51" onload="loaded.push('${image_A_url_51}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_51" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_51}" height="256" id="hiddenB_51" onload="loaded.push('${image_B_url_51}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_52}" name="show" onclick="showHide(this,'hiddenA_52','hiddenB_52',${time_52})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_52" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_52}" height="256/" id="hiddenA_52" onload="loaded.push('${image_A_url_52}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_52" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_52}" height="256" id="hiddenB_52" onload="loaded.push('${image_B_url_52}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_53}" name="show" onclick="showHide(this,'hiddenA_53','hiddenB_53',${time_53})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_53" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_53}" height="256/" id="hiddenA_53" onload="loaded.push('${image_A_url_53}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_53" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_53}" height="256" id="hiddenB_53" onload="loaded.push('${image_B_url_53}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_54}" name="show" onclick="showHide(this,'hiddenA_54','hiddenB_54',${time_54})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_54" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_54}" height="256/" id="hiddenA_54" onload="loaded.push('${image_A_url_54}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_54" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_54}" height="256" id="hiddenB_54" onload="loaded.push('${image_B_url_54}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_55}" name="show" onclick="showHide(this,'hiddenA_55','hiddenB_55',${time_55})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_55" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_55}" height="256/" id="hiddenA_55" onload="loaded.push('${image_A_url_55}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_55" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_55}" height="256" id="hiddenB_55" onload="loaded.push('${image_B_url_55}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_56}" name="show" onclick="showHide(this,'hiddenA_56','hiddenB_56',${time_56})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_56" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_56}" height="256/" id="hiddenA_56" onload="loaded.push('${image_A_url_56}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_56" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_56}" height="256" id="hiddenB_56" onload="loaded.push('${image_B_url_56}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_57}" name="show" onclick="showHide(this,'hiddenA_57','hiddenB_57',${time_57})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_57" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_57}" height="256/" id="hiddenA_57" onload="loaded.push('${image_A_url_57}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_57" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_57}" height="256" id="hiddenB_57" onload="loaded.push('${image_B_url_57}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_58}" name="show" onclick="showHide(this,'hiddenA_58','hiddenB_58',${time_58})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_58" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_58}" height="256/" id="hiddenA_58" onload="loaded.push('${image_A_url_58}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_58" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_58}" height="256" id="hiddenB_58" onload="loaded.push('${image_B_url_58}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" data-dot-order="${dot_order_59}" name="show" onclick="showHide(this,'hiddenA_59','hiddenB_59',${time_59})" style="visibility: hidden;" type="show" value="Show Videos" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemA" name="choice_59" required="" type="radio" value="optionA" /> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" data-source="${image_A_url_59}" height="256/" id="hiddenA_59" onload="loaded.push('${image_A_url_59}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" disabled="true" id="itemB" name="choice_59" required="" type="radio" value="optionB" /> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" data-source="${image_B_url_59}" height="256" id="hiddenB_59" onload="loaded.push('${image_B_url_59}');" style="visibility:hidden;" width="256" /> </span> </label></div>
+</div>
+</div>
+<!-- OUTPUT_TIMED.TXT CONTENT ENDS HERE -->
+</section>
+<link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" integrity="sha384-IS73LIqjtYesmURkDE9MXKbXqYA8rvKEp/ghicjem7Vc3mGRdQRptJSz60tvrB6+" rel="stylesheet" />
+<style type="text/css">#collapseTrigger{ color:#fff; display: block; text-decoration: none; } #submitButton{ white-space: normal; } input.img-options{ 	margin: 3px 10px 5px 8px; } .img-check{ 	padding: 0; } .img-label{ 	padding: 6px 6px 0 6px; 	min-width: 300px; 	display: block; } .img-wrap{ 	background: transparent; 	display: block; } .img-background{ 	background: #5cb85c; } .img-btn{ 	padding: 0; 	display: block; } .row { border-bottom: 2px #428bca solid; margin-bottom: 25px; }
+</style>
+<p class="text-center">​<input class="btn btn-primary" disabled="true" id="submitButton" type="submit" value="You must complete the HIT before submitting" /></p>
+<script>
+$(document).ready(function(e){
+	// Instructions expand/collapse
+  var content = $('#contactInfoBody');
+  var trigger = $('#collapseTrigger');
+  content.hide();
+  $('.collapse-text').text('(Click to expand)');
+  trigger.click(function(){
+    content.toggle();
+    var isVisible = content.is(':visible');
+    if(isVisible){
+      $('.collapse-text').text('(Click to collapse)');
+    }else{
+      $('.collapse-text').text('(Click to expand)');
+    }
+  });
+  // end expand/collapse
+	// Highlight selection
+	var imageBackgroundSelector = ".img-wrap";
+	var imageBackgroundElement = $(imageBackgroundSelector);
+	$("#ImageAorB input:radio").click(function(){
+		imageBackgroundElement.removeClass("img-background");
+		if($(this).is(':checked')){
+			$(this).parent().siblings(imageBackgroundSelector).addClass("img-background");
+		}else{
+			$(this).parent().siblings(imageBackgroundSelector).remove("img-background");
+		}
+	});
+	// end highlight selection
+});
+</script>

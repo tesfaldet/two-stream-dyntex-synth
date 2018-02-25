@@ -1,0 +1,11 @@
+<div class="row">
+<p style="text-align: center;"><input class="btn btn-primary" name="show" onclick="showHide(this,'hiddenA','hiddenB',${time})" data-dot-order="${dot_order}" type="show" value="Show Videos" style="visibility: hidden;" /></p>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" id="itemA" name="choice" required="" type="radio" value="optionA" disabled="true"/> <span class="pull-left"><strong>Left video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"><img alt="Option A" class="img-thumbnail img-check" height="256/" id="hiddenA" data-source="${image_A_url}" style="visibility:hidden;" width="256" onload="loaded.push('${image_A_url}');"/> </span> </label></div>
+</div>
+
+<div class="col-xs-12 col-sm-6 col-md-6">
+<div class="form-group"><label class="btn btn-default img-btn"><span class="clearfix img-label"><input autocomplete="off" class="pull-left img-options" id="itemB" name="choice" required="" type="radio" value="optionB" disabled="true"/> <span class="pull-left"><strong>Right video is more realistic</strong></span> </span> <span class="img-wrap" style="width: 256px; height: 256px; margin: 10px auto; border: 2px #C3C3C3 dotted;"> <img alt="Option B" class="img-thumbnail img-check" height="256" id="hiddenB" data-source="${image_B_url}" style="visibility:hidden;" width="256" onload="loaded.push('${image_B_url}');"/> </span> </label></div>
+</div>
+</div>
