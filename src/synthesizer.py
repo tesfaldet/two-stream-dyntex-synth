@@ -26,7 +26,6 @@ class Synthesizer(Optimizer):
                                                 self.input_dimension, 3)))
                                                for img in imgs]
 
-                # TODO: check for b/w input
                 # initialize noise
                 initial_noise = tf.random_normal([self.user_config
                                                   ['batch_size'],
@@ -70,11 +69,15 @@ class Synthesizer(Optimizer):
             for i in range(self.input_frame_count):
                 # texture target is in RGB [0,1], but VGG
                 # accepts BGR [0-mean,255-mean] mean subtracted
-                input = [vgg_process(self.target_dynamic_texture[i]),
-                         self.output[:, i]]
-                a = AppearanceDescriptor('appearance_descriptor_' + str(i+1),
-                                         name, tf.concat(axis=0, values=input))
-                gramians.append([a.gramian_for_layer(l) for l in loss_layers])
+                target = vgg_process(self.target_dynamic_texture[i])
+                output = self.output[:, i]
+                a_t = AppearanceDescriptor('appearance_descriptor_target' +
+                                           str(i+1), name, target)
+                a_o = AppearanceDescriptor('appearance_descriptor_output' +
+                                           str(i+1), name, output)
+                g = ([a_t.gramian_for_layer(l) for l in loss_layers],
+                     [a_o.gramian_for_layer(l) for l in loss_layers])
+                gramians.append(g)
             return tf.multiply(self.style_loss('appearance_style_loss',
                                                gramians), weight)
 
@@ -91,18 +94,23 @@ class Synthesizer(Optimizer):
                 output = tf.image.rgb_to_grayscale(
                     vgg_deprocess(self.output[:, i:i+2], no_clip=True,
                                   unit_scale=True))
-                input = [target, output]
-                d = DynamicsDescriptor('dynamics_descriptor_' + str(i+1),
-                                       name, tf.concat(axis=0, values=input),
-                                       self.user_config['dynamics_model'])
-                gramians.append([d.gramian_for_layer(l) for l in loss_layers])
+                d_t = DynamicsDescriptor('dynamics_descriptor_target' +
+                                         str(i+1), name, target,
+                                         self.user_config['dynamics_model'])
+                d_o = DynamicsDescriptor('dynamics_descriptor_output' +
+                                         str(i+1), name, output,
+                                         self.user_config['dynamics_model'])
+                g = ([d_t.gramian_for_layer(l) for l in loss_layers],
+                     [d_o.gramian_for_layer(l) for l in loss_layers])
+                gramians.append(g)
             return tf.multiply(self.style_loss('dynamics_style_loss',
                                                gramians), weight)
 
     def style_loss(self, name, gramians):
         with tf.get_default_graph().name_scope(name):
-            num_layers = len(gramians[0])
-            target_gramians = [[g[:1] for g in grams] for grams in gramians]
+            num_layers = len(gramians[0][0])
+            target_gramians = [g[0] for g in gramians]
+            output_gramians = [g[1] for g in gramians]
             avg_target_grams = []
             style_losses = []
             for layer in range(num_layers):
@@ -113,7 +121,8 @@ class Synthesizer(Optimizer):
                 gramian_diffs = [
                     tf.tile(avg_target_grams[layer],
                             [self.user_config['batch_size'], 1, 1]) -
-                    gramians[frame][layer][1:] for layer in range(num_layers)]
+                    output_gramians[frame][layer] for layer in
+                    range(num_layers)]
 
                 # MSE
                 scaled_diffs = [tf.square(g) for g in gramian_diffs]
