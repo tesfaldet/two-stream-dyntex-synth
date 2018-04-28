@@ -37,9 +37,9 @@ class SynthesizerStyleTransfer(Optimizer):
                 # initialize noise
                 initial_noise = tf.random_normal([self.user_config
                                                   ['batch_size'],
-                                                  self.input_frame_count,
-                                                  self.input_dimension,
-                                                  self.input_dimension, 3])
+                                                  self.output_frame_count,
+                                                  self.output_dimension,
+                                                  self.output_dimension, 3])
                 self.output = tf.Variable(initial_noise, name='output')
 
                 # TODO: let weight be user-definable
