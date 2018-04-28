@@ -9,11 +9,14 @@ import os
 
 class Optimizer(object):
 
-    def __init__(self, graph, input_dimension, input_frame_count,
-                 target_dynamic_path, target_static_path, config):
+    def __init__(self, graph, input_dimension, output_dimension,
+                 input_frame_count, output_frame_count, target_dynamic_path,
+                 target_static_path, config):
         self.graph = graph
         self.input_dimension = input_dimension
+        self.output_dimension = output_dimension
         self.input_frame_count = input_frame_count
+        self.output_frame_count = output_frame_count
         self.target_dynamic_path = target_dynamic_path
         self.target_static_path = target_static_path
         # import config
@@ -80,9 +83,9 @@ class Optimizer(object):
                 if not os.path.isdir('data/out/' + run_id):
                     raise
             network_out = output.reshape((-1,
-                                          self.input_frame_count,
-                                          self.input_dimension,
-                                          self.input_dimension, 3))
+                                          self.output_frame_count,
+                                          self.output_dimension,
+                                          self.output_dimension, 3))
             img_count = 1
             for out in network_out:
                 frame_count = 1

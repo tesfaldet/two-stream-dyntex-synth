@@ -10,7 +10,7 @@ class Synthesizer(Optimizer):
 
     # TODO: let spatiotemporal size be user-definable
     def __init__(self, target_dynamic_path, config):
-        Optimizer.__init__(self, tf.Graph(), 256, 12,
+        Optimizer.__init__(self, tf.Graph(), 256, 512, 6, 6,
                            target_dynamic_path, '',
                            config)
 
@@ -29,9 +29,9 @@ class Synthesizer(Optimizer):
                 # initialize noise
                 initial_noise = tf.random_normal([self.user_config
                                                   ['batch_size'],
-                                                  self.input_frame_count,
-                                                  self.input_dimension,
-                                                  self.input_dimension, 3])
+                                                  self.output_frame_count,
+                                                  self.output_dimension,
+                                                  self.output_dimension, 3])
                 self.output = tf.Variable(initial_noise, name='output')
 
                 # dts weights, app: 1e9, dyn: 1e15
