@@ -10,7 +10,7 @@ class Synthesizer(Optimizer):
 
     # TODO: let spatiotemporal size be user-definable
     def __init__(self, target_dynamic_path, config):
-        Optimizer.__init__(self, tf.Graph(), 256, 512, 6, 6,
+        Optimizer.__init__(self, tf.Graph(), 256, 256, 12, 12,
                            target_dynamic_path, '',
                            config)
 
@@ -60,6 +60,7 @@ class Synthesizer(Optimizer):
                 # attach summaries
                 self.attach_summaries('summaries')
 
+    # TODO: decouple temporal length between target and output
     def build_appearance_descriptors(self, name, weight):
         with tf.get_default_graph().name_scope(name):
             # TODO: make this user-definable
@@ -71,9 +72,9 @@ class Synthesizer(Optimizer):
                 # accepts BGR [0-mean,255-mean] mean subtracted
                 target = vgg_process(self.target_dynamic_texture[i])
                 output = self.output[:, i]
-                a_t = AppearanceDescriptor('appearance_descriptor_target' +
+                a_t = AppearanceDescriptor('appearance_descriptor_target_' +
                                            str(i+1), name, target)
-                a_o = AppearanceDescriptor('appearance_descriptor_output' +
+                a_o = AppearanceDescriptor('appearance_descriptor_output_' +
                                            str(i+1), name, output)
                 g = ([a_t.gramian_for_layer(l) for l in loss_layers],
                      [a_o.gramian_for_layer(l) for l in loss_layers])
@@ -81,6 +82,7 @@ class Synthesizer(Optimizer):
             return tf.multiply(self.style_loss('appearance_style_loss',
                                                gramians), weight)
 
+    # TODO: decouple temporal length between target and output
     def build_dynamics_descriptors(self, name, weight):
         with tf.get_default_graph().name_scope(name):
             loss_layers = ['MSOEnet_concat/concat']  # concat layer
@@ -94,10 +96,10 @@ class Synthesizer(Optimizer):
                 output = tf.image.rgb_to_grayscale(
                     vgg_deprocess(self.output[:, i:i+2], no_clip=True,
                                   unit_scale=True))
-                d_t = DynamicsDescriptor('dynamics_descriptor_target' +
+                d_t = DynamicsDescriptor('dynamics_descriptor_target_' +
                                          str(i+1), name, target,
                                          self.user_config['dynamics_model'])
-                d_o = DynamicsDescriptor('dynamics_descriptor_output' +
+                d_o = DynamicsDescriptor('dynamics_descriptor_output_' +
                                          str(i+1), name, output,
                                          self.user_config['dynamics_model'])
                 g = ([d_t.gramian_for_layer(l) for l in loss_layers],
