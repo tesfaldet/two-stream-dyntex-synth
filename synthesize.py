@@ -5,6 +5,7 @@ from src.synthesizer_styletransfer import SynthesizerStyleTransfer
 from src.synthesizer_infinite import SynthesizerInfinite
 from src.synthesizer_incremental import SynthesizerIncremental
 from src.synthesizer_static import SynthesizerStatic
+from src.synthesizer_masking import SynthesizerMasking
 
 # set up argument parser
 parser = argparse.ArgumentParser()
@@ -80,5 +81,11 @@ elif opt.type == 'sta':
     s = SynthesizerStatic(opt.appearance_target,
                           config={'tf': config_proto,
                                   'user': my_config})
+
+if opt.type == 'mas':
+    assert opt.dynamics_target != ''
+    s = SynthesizerMasking(opt.dynamics_target,
+                           config={'tf': config_proto,
+                                   'user': my_config})
 
 s.optimize()

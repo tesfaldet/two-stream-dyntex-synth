@@ -42,3 +42,9 @@ def gramian(activations, normalize_method=None):
         mult = tf.multiply(normalize_scale, mult)
 
     return mult
+
+
+def stop_gradients(name, input_layer, mask):
+    with tf.get_default_graph().name_scope(name):
+        mask_inv = tf.abs(mask - 1)
+        return tf.stop_gradient(mask_inv * input_layer) + mask * input_layer

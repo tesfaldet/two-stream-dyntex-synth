@@ -18,7 +18,8 @@ def load_image(path, size=(200, 200)):
     # load image (skimage reads as RGB HWC [0,255] uint8)
     # convert to rgb if gray
     # VGG accepts BGR CHW [0,255] float32
-    img = skimage.color.gray2rgb(skimage.io.imread(path)).astype('float32') / 255.0
+    img = skimage.color.gray2rgb(skimage.io.imread(path)) \
+        .astype('float32') / 255.0
     assert (0 <= img).all() and (img <= 1.0).all()
     # we crop image from center
     short_edge = min(img.shape[:2])
