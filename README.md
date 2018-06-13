@@ -23,7 +23,7 @@ Store your chosen dynamic texture image sequence in a folder in `/data/dynamic_t
 
 #### Example usage
 ```
-python synthesize.py --type=dts --gpu=0 --runid="my_cool_fish" --dynamics_target=data/dynamic_textures/fish --dynamics_model=models/vgg19_normalized.tfmodel
+python synthesize.py --type=dts --gpu=0 --runid="my_cool_fish" --dynamics_target=data/dynamic_textures/fish --dynamics_model=models/MSOEnet_ucf101train01_6e-4_allaug_exceptscale_randorder.tfmodel
 ```
 
 ## Dynamics style transfer
@@ -35,7 +35,7 @@ Store your chosen static texture in `./data/textures`. The filepath to this text
 
 #### Example usage
 ```
-python synthesize.py --type=dst --gpu=0 --runid="whoa_water!" --dynamics_target=data/dynamic_textures/water_4 --appearance_target=data/textures/water_paint_cropped.jpeg --dynamics_model=models/vgg19_normalized.tfmodel
+python synthesize.py --type=dst --gpu=0 --runid="whoa_water!" --dynamics_target=data/dynamic_textures/water_4 --appearance_target=data/textures/water_paint_cropped.jpeg --dynamics_model=models/MSOEnet_ucf101train01_6e-4_allaug_exceptscale_randorder.tfmodel
 ```
 
 ## Temporally-endless dynamic texture synthesis
